@@ -23,6 +23,13 @@ repositories {
         name = "Kotlin for Forge"
         setUrl("https://thedarkcolour.github.io/KotlinForForge/")
     }
+    maven {
+        url = uri("https://maven.pkg.github.com/refinedmods/refinedstorage2")
+        credentials {
+            username = "anything"
+            password = "\u0067hp_oGjcDFCn8jeTzIj4Ke9pLoEVtpnZMP4VQgaX"
+        }
+    }
 }
 
 base {
@@ -119,6 +126,8 @@ configurations {
 dependencies {
     // Since Kotlin is its own JVM language with its own standard library, a custom language loader needs to be used, i.e. KFF
     implementation("thedarkcolour:kotlinforforge-neoforge:$kff_version")
+
+    api("com.refinedmods.refinedstorage:refinedstorage-neoforge:${refined_storage_version}")
 
     // Example optional mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
