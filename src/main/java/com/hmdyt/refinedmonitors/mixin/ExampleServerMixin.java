@@ -1,6 +1,6 @@
-package com.example.examplemod.mixin;
+package com.hmdyt.refinedmonitors.mixin;
 
-import com.example.examplemod.ExampleMod;
+import com.hmdyt.refinedmonitors.ExampleMod;
 import com.mojang.logging.LogUtils;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.server.MinecraftServer;

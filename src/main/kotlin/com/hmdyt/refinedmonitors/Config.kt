@@ -1,4 +1,4 @@
-package com.example.examplemod
+package com.hmdyt.refinedmonitors
 
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.resources.ResourceLocation
