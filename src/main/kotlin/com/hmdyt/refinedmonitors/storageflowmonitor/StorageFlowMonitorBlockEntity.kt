@@ -1,4 +1,4 @@
-package com.hmdyt.refinedmonitors.storagemonitor
+package com.hmdyt.refinedmonitors.storageflowmonitor
 
 import com.hmdyt.refinedmonitors.RefinedMonitorsMod
 import com.refinedmods.refinedstorage.api.network.Network
@@ -23,18 +23,18 @@ import net.minecraft.world.inventory.AbstractContainerMenu
 import net.minecraft.world.level.block.state.BlockState
 import org.slf4j.LoggerFactory
 
-class StorageMonitorBlockEntity(
+class StorageFlowMonitorBlockEntity(
     pos: BlockPos,
     state: BlockState,
 ) : AbstractBaseNetworkNodeContainerBlockEntity<SimpleNetworkNode>(
-        RefinedMonitorsMod.STORAGE_MONITOR_BLOCK_ENTITY.get(),
+        RefinedMonitorsMod.STORAGE_FLOW_MONITOR_BLOCK_ENTITY.get(),
         pos,
         state,
         SimpleNetworkNode(25L),
     ),
     MenuProvider {
     companion object {
-        private val LOGGER = LoggerFactory.getLogger(StorageMonitorBlockEntity::class.java)
+        private val LOGGER = LoggerFactory.getLogger(StorageFlowMonitorBlockEntity::class.java)
 
         private const val TAG_CLIENT_FILTER = "cf"
         private const val TAG_CLIENT_AMOUNT = "ca"
@@ -114,7 +114,7 @@ class StorageMonitorBlockEntity(
             return
         }
 
-        LOGGER.info("StorageMonitor insert called by player: ${player.name.string}")
+        LOGGER.info("StorageFlowMonitor insert called by player: ${player.name.string}")
 
         // TODO: RS2ネットワークへの挿入処理を実装
         if (doInsert(player, hand)) {
@@ -153,7 +153,7 @@ class StorageMonitorBlockEntity(
             return
         }
 
-        LOGGER.info("StorageMonitor extract called by player: ${player.name.string}")
+        LOGGER.info("StorageFlowMonitor extract called by player: ${player.name.string}")
 
         // TODO: RS2ネットワークからの抽出処理を実装
         val extracted = doExtract(player)
@@ -209,7 +209,7 @@ class StorageMonitorBlockEntity(
     }
 
     override fun getName(): Component {
-        return Component.translatable("block.refinedmonitors.storage_monitor")
+        return Component.translatable("block.refinedmonitors.storage_flow_monitor")
     }
 
     override fun createMenu(
@@ -217,7 +217,7 @@ class StorageMonitorBlockEntity(
         playerInventory: Inventory,
         player: Player,
     ): AbstractContainerMenu {
-        return StorageMonitorContainerMenu(containerId, playerInventory, this)
+        return StorageFlowMonitorContainerMenu(containerId, playerInventory, this)
     }
 
     fun isCurrentlyActive(): Boolean {

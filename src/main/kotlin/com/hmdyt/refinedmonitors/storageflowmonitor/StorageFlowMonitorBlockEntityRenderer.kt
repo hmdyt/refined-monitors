@@ -1,4 +1,4 @@
-package com.hmdyt.refinedmonitors.storagemonitor
+package com.hmdyt.refinedmonitors.storageflowmonitor
 
 import com.mojang.blaze3d.vertex.PoseStack
 import com.refinedmods.refinedstorage.api.resource.ResourceKey
@@ -13,14 +13,14 @@ import net.minecraft.util.Mth
 import net.minecraft.world.level.Level
 import org.joml.Quaternionf
 
-class StorageMonitorBlockEntityRenderer : BlockEntityRenderer<StorageMonitorBlockEntity> {
+class StorageFlowMonitorBlockEntityRenderer : BlockEntityRenderer<StorageFlowMonitorBlockEntity> {
     companion object {
         private val ROTATE_TO_FRONT = Quaternionf().rotationY(Mth.DEG_TO_RAD * 180)
         private const val FONT_SPACING = -0.23f
     }
 
     override fun render(
-        blockEntity: StorageMonitorBlockEntity,
+        blockEntity: StorageFlowMonitorBlockEntity,
         tickDelta: Float,
         poseStack: PoseStack,
         vertexConsumers: MultiBufferSource,
@@ -47,12 +47,12 @@ class StorageMonitorBlockEntityRenderer : BlockEntityRenderer<StorageMonitorBloc
     }
 
     private fun getDirection(
-        blockEntity: StorageMonitorBlockEntity,
+        blockEntity: StorageFlowMonitorBlockEntity,
         level: Level,
     ): Direction? {
         val state = level.getBlockState(blockEntity.blockPos)
-        return if (state.block is StorageMonitorBlock) {
-            state.getValue(StorageMonitorBlock.FACING)
+        return if (state.block is StorageFlowMonitorBlock) {
+            state.getValue(StorageFlowMonitorBlock.FACING)
         } else {
             null
         }

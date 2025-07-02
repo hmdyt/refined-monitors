@@ -1,4 +1,4 @@
-package com.hmdyt.refinedmonitors.storagemonitor
+package com.hmdyt.refinedmonitors.storageflowmonitor
 
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
@@ -22,7 +22,7 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty
 import net.minecraft.world.level.material.MapColor
 import net.minecraft.world.phys.BlockHitResult
 
-class StorageMonitorBlock :
+class StorageFlowMonitorBlock :
     Block(
         Properties.of()
             .mapColor(MapColor.METAL)
@@ -33,7 +33,7 @@ class StorageMonitorBlock :
     companion object {
         val FACING: DirectionProperty = DirectionProperty.create("facing", Direction.entries)
 
-        private val HELP = Component.translatable("item.refinedmonitors.storage_monitor.help")
+        private val HELP = Component.translatable("item.refinedmonitors.storage_flow_monitor.help")
     }
 
     init {
@@ -51,7 +51,7 @@ class StorageMonitorBlock :
         pos: BlockPos,
         state: BlockState,
     ): BlockEntity {
-        return StorageMonitorBlockEntity(pos, state)
+        return StorageFlowMonitorBlockEntity(pos, state)
     }
 
     override fun getRenderShape(state: BlockState): RenderShape {
@@ -68,7 +68,7 @@ class StorageMonitorBlock :
         }
 
         return BlockEntityTicker { tickLevel, tickPos, tickState, tickBlockEntity ->
-            if (tickBlockEntity is StorageMonitorBlockEntity) {
+            if (tickBlockEntity is StorageFlowMonitorBlockEntity) {
                 tickBlockEntity.tick()
             }
         }
@@ -86,7 +86,7 @@ class StorageMonitorBlock :
         if (player.isCrouching) {
             if (!level.isClientSide) {
                 val blockEntity = level.getBlockEntity(pos)
-                if (blockEntity is StorageMonitorBlockEntity) {
+                if (blockEntity is StorageFlowMonitorBlockEntity) {
                     player.openMenu(blockEntity)
                 }
             }
@@ -95,7 +95,7 @@ class StorageMonitorBlock :
 
         if (!level.isClientSide) {
             val blockEntity = level.getBlockEntity(pos)
-            if (blockEntity is StorageMonitorBlockEntity) {
+            if (blockEntity is StorageFlowMonitorBlockEntity) {
                 blockEntity.insert(player, hand)
             }
         }
@@ -116,7 +116,7 @@ class StorageMonitorBlock :
         }
 
         val blockEntity = level.getBlockEntity(pos)
-        if (blockEntity !is StorageMonitorBlockEntity) {
+        if (blockEntity !is StorageFlowMonitorBlockEntity) {
             return
         }
 

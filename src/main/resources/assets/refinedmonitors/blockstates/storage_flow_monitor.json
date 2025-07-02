@@ -1,0 +1,27 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "refinedmonitors:block/storage_flow_monitor"
+    },
+    "facing=south": {
+      "model": "refinedmonitors:block/storage_flow_monitor",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "refinedmonitors:block/storage_flow_monitor",
+      "y": 270
+    },
+    "facing=east": {
+      "model": "refinedmonitors:block/storage_flow_monitor",
+      "y": 90
+    },
+    "facing=up": {
+      "model": "refinedmonitors:block/storage_flow_monitor",
+      "x": 270
+    },
+    "facing=down": {
+      "model": "refinedmonitors:block/storage_flow_monitor",
+      "x": 90
+    }
+  }
+}

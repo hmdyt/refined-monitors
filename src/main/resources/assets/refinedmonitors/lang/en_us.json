@@ -1,7 +1,5 @@
 {
   "itemGroup.refinedmonitors": "Refined Monitors Tab",
-  "block.refinedmonitors.storage_monitor": "Storage Monitor",
-  "item.refinedmonitors.storage_monitor.help": "Shows the amount of a specific resource in the network",
-  "block.refinedmonitors.example_block": "Example Block",
-  "item.refinedmonitors.example_item": "Example Item"
+  "block.refinedmonitors.storage_flow_monitor": "Storage Flow Monitor",
+  "item.refinedmonitors.storage_flow_monitor.help": "Shows the amount and flow rate of a specific resource in the network"
 }

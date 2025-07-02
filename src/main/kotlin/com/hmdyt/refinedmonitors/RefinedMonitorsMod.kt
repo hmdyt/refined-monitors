@@ -1,9 +1,10 @@
 package com.hmdyt.refinedmonitors
 
-import com.hmdyt.refinedmonitors.storagemonitor.StorageMonitorBlockEntity
-import com.hmdyt.refinedmonitors.storagemonitor.StorageMonitorBlockEntityRenderer
-import com.hmdyt.refinedmonitors.storagemonitor.StorageMonitorBlocks
-import com.hmdyt.refinedmonitors.storagemonitor.StorageMonitorContainerMenu
+import com.hmdyt.refinedmonitors.storageflowmonitor.StorageFlowMonitorBlockEntity
+import com.hmdyt.refinedmonitors.storageflowmonitor.StorageFlowMonitorBlockEntityRenderer
+import com.hmdyt.refinedmonitors.storageflowmonitor.StorageFlowMonitorBlocks
+import com.hmdyt.refinedmonitors.storageflowmonitor.StorageFlowMonitorContainerMenu
+import com.hmdyt.refinedmonitors.storageflowmonitor.StorageFlowMonitorScreen
 import com.mojang.logging.LogUtils
 import net.minecraft.client.Minecraft
 import net.minecraft.core.registries.BuiltInRegistries
@@ -28,6 +29,7 @@ import net.neoforged.fml.config.ModConfig
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent
 import net.neoforged.neoforge.client.event.EntityRenderersEvent
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent
 import net.neoforged.neoforge.common.NeoForge
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent
 import net.neoforged.neoforge.event.server.ServerStartingEvent
@@ -63,30 +65,30 @@ class RefinedMonitorsMod {
         val MENU_TYPES: DeferredRegister<MenuType<*>> =
             DeferredRegister.create(Registries.MENU, MODID)
 
-        val STORAGE_MONITOR: DeferredBlock<Block> =
-            BLOCKS.register("storage_monitor", Supplier { StorageMonitorBlocks.STORAGE_MONITOR })
+        val STORAGE_FLOW_MONITOR: DeferredBlock<Block> =
+            BLOCKS.register("storage_flow_monitor", Supplier { StorageFlowMonitorBlocks.STORAGE_FLOW_MONITOR })
 
-        val STORAGE_MONITOR_BLOCK_ENTITY: DeferredHolder<BlockEntityType<*>, BlockEntityType<*>> =
+        val STORAGE_FLOW_MONITOR_BLOCK_ENTITY: DeferredHolder<BlockEntityType<*>, BlockEntityType<*>> =
             BLOCK_ENTITIES.register(
-                "storage_monitor",
+                "storage_flow_monitor",
                 Supplier {
                     BlockEntityType.Builder.of(
-                        { pos, state -> StorageMonitorBlocks.STORAGE_MONITOR.newBlockEntity(pos, state) },
-                        StorageMonitorBlocks.STORAGE_MONITOR,
+                        { pos, state -> StorageFlowMonitorBlocks.STORAGE_FLOW_MONITOR.newBlockEntity(pos, state) },
+                        StorageFlowMonitorBlocks.STORAGE_FLOW_MONITOR,
                     ).build(null)
                 },
             )
 
-        val STORAGE_MONITOR_ITEM: DeferredItem<BlockItem> =
-            ITEMS.registerSimpleBlockItem("storage_monitor", STORAGE_MONITOR)
+        val STORAGE_FLOW_MONITOR_ITEM: DeferredItem<BlockItem> =
+            ITEMS.registerSimpleBlockItem("storage_flow_monitor", STORAGE_FLOW_MONITOR)
 
-        val STORAGE_MONITOR_MENU_TYPE: DeferredHolder<MenuType<*>, MenuType<StorageMonitorContainerMenu>> =
+        val STORAGE_FLOW_MONITOR_MENU_TYPE: DeferredHolder<MenuType<*>, MenuType<StorageFlowMonitorContainerMenu>> =
             MENU_TYPES.register(
-                "storage_monitor",
+                "storage_flow_monitor",
                 Supplier {
                     MenuType(
                         { id: Int, inventory: Inventory ->
-                            StorageMonitorContainerMenu(id, inventory)
+                            StorageFlowMonitorContainerMenu(id, inventory)
                         },
                         net.minecraft.world.flag.FeatureFlags.DEFAULT_FLAGS,
                     )
@@ -102,9 +104,9 @@ class RefinedMonitorsMod {
                             Component.translatable("itemGroup.refinedmonitors"),
                         )
                         .withTabsBefore(CreativeModeTabs.COMBAT)
-                        .icon { STORAGE_MONITOR_ITEM.get().defaultInstance }
+                        .icon { STORAGE_FLOW_MONITOR_ITEM.get().defaultInstance }
                         .displayItems { parameters: ItemDisplayParameters?, output: CreativeModeTab.Output ->
-                            output.accept(STORAGE_MONITOR_ITEM.get())
+                            output.accept(STORAGE_FLOW_MONITOR_ITEM.get())
                         }.build()
                 },
             )
@@ -120,10 +122,18 @@ class RefinedMonitorsMod {
             @SubscribeEvent
             fun onRegisterRenderers(event: EntityRenderersEvent.RegisterRenderers) {
                 event.registerBlockEntityRenderer(
-                    STORAGE_MONITOR_BLOCK_ENTITY.get() as BlockEntityType<StorageMonitorBlockEntity>,
+                    STORAGE_FLOW_MONITOR_BLOCK_ENTITY.get() as BlockEntityType<StorageFlowMonitorBlockEntity>,
                 ) { context ->
-                    StorageMonitorBlockEntityRenderer()
+                    StorageFlowMonitorBlockEntityRenderer()
                 }
+            }
+
+            @SubscribeEvent
+            fun onRegisterMenuScreens(event: RegisterMenuScreensEvent) {
+                event.register(
+                    STORAGE_FLOW_MONITOR_MENU_TYPE.get() as MenuType<StorageFlowMonitorContainerMenu>,
+                    ::StorageFlowMonitorScreen,
+                )
             }
         }
     }
@@ -154,7 +164,7 @@ class RefinedMonitorsMod {
 
     private fun addCreative(event: BuildCreativeModeTabContentsEvent) {
         if (event.tabKey === CreativeModeTabs.BUILDING_BLOCKS) {
-            event.accept(STORAGE_MONITOR_ITEM)
+            event.accept(STORAGE_FLOW_MONITOR_ITEM)
         }
     }
 

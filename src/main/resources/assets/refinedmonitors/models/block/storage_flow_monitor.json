@@ -1,0 +1,12 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "particle": "refinedmonitors:block/side",
+    "north": "refinedmonitors:block/storage_flow_monitor/front",
+    "east": "refinedmonitors:block/storage_flow_monitor/left",
+    "south": "refinedmonitors:block/storage_flow_monitor/back",
+    "west": "refinedmonitors:block/storage_flow_monitor/right",
+    "up": "refinedmonitors:block/storage_flow_monitor/top",
+    "down": "refinedmonitors:block/bottom"
+  }
+}
