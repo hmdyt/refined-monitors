@@ -30,7 +30,7 @@ object Config {
         BUILDER.comment("A list of items to log on common setup.").defineListAllowEmpty(
             "items",
             listOf("minecraft:iron_ingot"),
-            ::validateItemName
+            ::validateItemName,
         )
 
     val SPEC: ModConfigSpec = BUILDER.build()
@@ -51,10 +51,13 @@ object Config {
         magicNumberIntroduction = MAGIC_NUMBER_INTRODUCTION.get()
 
         // convert the list of strings into a set of items
-        items = ITEM_STRINGS.get().stream().map { itemName: String? ->
-            BuiltInRegistries.ITEM[ResourceLocation.parse(
-                itemName
-            )]
-        }.collect(Collectors.toSet())
+        items =
+            ITEM_STRINGS.get().stream().map { itemName: String? ->
+                BuiltInRegistries.ITEM[
+                    ResourceLocation.parse(
+                        itemName,
+                    ),
+                ]
+            }.collect(Collectors.toSet())
     }
 }

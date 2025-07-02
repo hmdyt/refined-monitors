@@ -1,0 +1,4 @@
+[tools]
+"npm:@anthropic-ai/claude-code" = "latest"
+"npm:ccusage" = "latest"
+"npm:reviewit" = "latest"

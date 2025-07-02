@@ -40,17 +40,22 @@ class ExampleMod {
     companion object {
         // Define mod id in a common place for everything to reference
         const val MODID = "examplemod"
+
         // Directly reference a slf4j logger
         private val LOGGER = LogUtils.getLogger()
 
         // Create a Deferred Register to hold Blocks which will all be registered under the "examplemod" namespace
-        val BLOCKS: DeferredRegister.Blocks = DeferredRegister.createBlocks(
-            MODID
-        )
+        val BLOCKS: DeferredRegister.Blocks =
+            DeferredRegister.createBlocks(
+                MODID,
+            )
+
         // Create a Deferred Register to hold Items which will all be registered under the "examplemod" namespace
-        val ITEMS: DeferredRegister.Items = DeferredRegister.createItems(
-            MODID
-        )
+        val ITEMS: DeferredRegister.Items =
+            DeferredRegister.createItems(
+                MODID,
+            )
+
         // Create a Deferred Register to hold CreativeModeTabs which will all be registered under the "examplemod" namespace
         val CREATIVE_MODE_TABS: DeferredRegister<CreativeModeTab> =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID)
@@ -58,28 +63,36 @@ class ExampleMod {
         // Creates a new Block with the id "examplemod:example_block", combining the namespace and path
         val EXAMPLE_BLOCK: DeferredBlock<Block> =
             BLOCKS.registerSimpleBlock("example_block", BlockBehaviour.Properties.of().mapColor(MapColor.STONE))
+
         // Creates a new BlockItem with the id "examplemod:example_block", combining the namespace and path
         val EXAMPLE_BLOCK_ITEM: DeferredItem<BlockItem> = ITEMS.registerSimpleBlockItem("example_block", EXAMPLE_BLOCK)
 
         // Creates a new food item with the id "examplemod:example_id", nutrition 1 and saturation 2
-        val EXAMPLE_ITEM: DeferredItem<Item> = ITEMS.registerSimpleItem(
-            "example_item", Item.Properties().food(
-                FoodProperties.Builder()
-                    .alwaysEdible().nutrition(1).saturationModifier(2f).build()
+        val EXAMPLE_ITEM: DeferredItem<Item> =
+            ITEMS.registerSimpleItem(
+                "example_item",
+                Item.Properties().food(
+                    FoodProperties.Builder()
+                        .alwaysEdible().nutrition(1).saturationModifier(2f).build(),
+                ),
             )
-        )
 
         // Creates a creative tab with the id "examplemod:example_tab" for the example item, that is placed after the combat tab
-        val EXAMPLE_TAB: DeferredHolder<CreativeModeTab, CreativeModeTab> = CREATIVE_MODE_TABS.register("example_tab",
-            Supplier {
-                CreativeModeTab.builder()
-                    .title(Component.translatable("itemGroup.examplemod")) //The language key for the title of your CreativeModeTab
-                    .withTabsBefore(CreativeModeTabs.COMBAT)
-                    .icon { EXAMPLE_ITEM.get().defaultInstance }
-                    .displayItems { parameters: ItemDisplayParameters?, output: CreativeModeTab.Output ->
-                        output.accept(EXAMPLE_ITEM.get()) // Add the example item to the tab. For your own tabs, this method is preferred over the event
-                    }.build()
-            })
+        val EXAMPLE_TAB: DeferredHolder<CreativeModeTab, CreativeModeTab> =
+            CREATIVE_MODE_TABS.register(
+                "example_tab",
+                Supplier {
+                    CreativeModeTab.builder()
+                        .title(Component.translatable("itemGroup.examplemod")) // The language key for the title of your CreativeModeTab
+                        .withTabsBefore(CreativeModeTabs.COMBAT)
+                        .icon { EXAMPLE_ITEM.get().defaultInstance }
+                        .displayItems { parameters: ItemDisplayParameters?, output: CreativeModeTab.Output ->
+                            output.accept(
+                                EXAMPLE_ITEM.get(),
+                            ) // Add the example item to the tab. For your own tabs, this method is preferred over the event
+                        }.build()
+                },
+            )
 
         // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
         @EventBusSubscriber(modid = MODID, bus = EventBusSubscriber.Bus.MOD, value = [Dist.CLIENT])
@@ -124,12 +137,14 @@ class ExampleMod {
 
         LOGGER.info(Config.magicNumberIntroduction + Config.magicNumber)
 
-        Config.items.forEach(Consumer { item: Item ->
-            LOGGER.info(
-                "ITEM >> {}",
-                item.toString()
-            )
-        })
+        Config.items.forEach(
+            Consumer { item: Item ->
+                LOGGER.info(
+                    "ITEM >> {}",
+                    item.toString(),
+                )
+            },
+        )
     }
 
     // Add the example block item to the building blocks tab
