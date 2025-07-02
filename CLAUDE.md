@@ -1,10 +1,11 @@
 # CLAUDE.md
-
-このファイルは、このリポジトリでコードを扱う際のClaude Code (claude.ai/code) へのガイダンスを提供します。
-
 ## プロジェクト概要
 
 これは**Refined Monitors**、Refined Storage 2を拡張するNeoForge 1.21.1用のMinecraftModです。このプロジェクトはKotlinで構築され、Mixin部分にはJavaを使用し、最新のNeoForge開発手法に従っています。
+
+## 開発における注意点
+- stepごとにformatとbuildを実行する
+- 絶対にコードにコメントを残さない
 
 ## 主要な開発コマンド
 
@@ -25,7 +26,7 @@
 
 ### コード品質
 ```bash
-./gradlew ktlintCheck          # Kotlinコードスタイルをチェック
+./gradlew check                # Kotlinコードスタイルをチェック
 ./gradlew ktlintFormat         # Kotlinフォーマットの問題を自動修正
 ```
 
