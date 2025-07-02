@@ -1,6 +1,6 @@
 package com.hmdyt.refinedmonitors.storagemonitor
 
-import com.hmdyt.refinedmonitors.ExampleMod
+import com.hmdyt.refinedmonitors.RefinedMonitorsMod
 import com.refinedmods.refinedstorage.api.network.Network
 import com.refinedmods.refinedstorage.api.network.impl.node.SimpleNetworkNode
 import com.refinedmods.refinedstorage.api.network.storage.StorageNetworkComponent
@@ -27,7 +27,7 @@ class StorageMonitorBlockEntity(
     pos: BlockPos,
     state: BlockState,
 ) : AbstractBaseNetworkNodeContainerBlockEntity<SimpleNetworkNode>(
-        ExampleMod.STORAGE_MONITOR_BLOCK_ENTITY.get(),
+        RefinedMonitorsMod.STORAGE_MONITOR_BLOCK_ENTITY.get(),
         pos,
         state,
         SimpleNetworkNode(25L),

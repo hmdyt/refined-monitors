@@ -16,7 +16,6 @@ import net.minecraft.world.level.block.RenderShape
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.entity.BlockEntityTicker
 import net.minecraft.world.level.block.entity.BlockEntityType
-import net.minecraft.world.level.block.state.BlockBehaviour
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.block.state.StateDefinition
 import net.minecraft.world.level.block.state.properties.DirectionProperty
@@ -25,14 +24,14 @@ import net.minecraft.world.phys.BlockHitResult
 
 class StorageMonitorBlock :
     Block(
-        BlockBehaviour.Properties.of()
+        Properties.of()
             .mapColor(MapColor.METAL)
             .strength(2.0f)
             .requiresCorrectToolForDrops(),
     ),
     EntityBlock {
     companion object {
-        val FACING: DirectionProperty = DirectionProperty.create("facing", Direction.values().toList())
+        val FACING: DirectionProperty = DirectionProperty.create("facing", Direction.entries)
 
         private val HELP = Component.translatable("item.refinedmonitors.storage_monitor.help")
     }

@@ -10,18 +10,14 @@ import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
-import net.minecraft.world.food.FoodProperties
 import net.minecraft.world.inventory.MenuType
 import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.CreativeModeTab
 import net.minecraft.world.item.CreativeModeTab.ItemDisplayParameters
 import net.minecraft.world.item.CreativeModeTabs
-import net.minecraft.world.item.Item
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.entity.BlockEntityType
-import net.minecraft.world.level.block.state.BlockBehaviour
-import net.minecraft.world.level.material.MapColor
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.bus.api.IEventBus
 import net.neoforged.bus.api.SubscribeEvent
@@ -39,11 +35,10 @@ import net.neoforged.neoforge.registries.DeferredBlock
 import net.neoforged.neoforge.registries.DeferredHolder
 import net.neoforged.neoforge.registries.DeferredItem
 import net.neoforged.neoforge.registries.DeferredRegister
-import java.util.function.Consumer
 import java.util.function.Supplier
 
-@Mod(ExampleMod.MODID)
-class ExampleMod {
+@Mod(RefinedMonitorsMod.MODID)
+class RefinedMonitorsMod {
     companion object {
         const val MODID = "refinedmonitors"
 
@@ -98,20 +93,6 @@ class ExampleMod {
                 },
             )
 
-        val EXAMPLE_BLOCK: DeferredBlock<Block> =
-            BLOCKS.registerSimpleBlock("example_block", BlockBehaviour.Properties.of().mapColor(MapColor.STONE))
-
-        val EXAMPLE_BLOCK_ITEM: DeferredItem<BlockItem> = ITEMS.registerSimpleBlockItem("example_block", EXAMPLE_BLOCK)
-
-        val EXAMPLE_ITEM: DeferredItem<Item> =
-            ITEMS.registerSimpleItem(
-                "example_item",
-                Item.Properties().food(
-                    FoodProperties.Builder()
-                        .alwaysEdible().nutrition(1).saturationModifier(2f).build(),
-                ),
-            )
-
         val REFINED_MONITORS_TAB: DeferredHolder<CreativeModeTab, CreativeModeTab> =
             CREATIVE_MODE_TABS.register(
                 "refined_monitors_tab",
@@ -124,7 +105,6 @@ class ExampleMod {
                         .icon { STORAGE_MONITOR_ITEM.get().defaultInstance }
                         .displayItems { parameters: ItemDisplayParameters?, output: CreativeModeTab.Output ->
                             output.accept(STORAGE_MONITOR_ITEM.get())
-                            output.accept(EXAMPLE_ITEM.get())
                         }.build()
                 },
             )
@@ -170,21 +150,11 @@ class ExampleMod {
         if (Config.logDirtBlock) LOGGER.info("DIRT BLOCK >> {}", BuiltInRegistries.BLOCK.getKey(Blocks.DIRT))
 
         LOGGER.info(Config.magicNumberIntroduction + Config.magicNumber)
-
-        Config.items.forEach(
-            Consumer { item: Item ->
-                LOGGER.info(
-                    "ITEM >> {}",
-                    item.toString(),
-                )
-            },
-        )
     }
 
     private fun addCreative(event: BuildCreativeModeTabContentsEvent) {
         if (event.tabKey === CreativeModeTabs.BUILDING_BLOCKS) {
             event.accept(STORAGE_MONITOR_ITEM)
-            event.accept(EXAMPLE_BLOCK_ITEM)
         }
     }
 

@@ -1,6 +1,6 @@
 package com.hmdyt.refinedmonitors.mixin;
 
-import com.hmdyt.refinedmonitors.ExampleMod;
+import com.hmdyt.refinedmonitors.RefinedMonitorsMod;
 import com.mojang.logging.LogUtils;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.server.MinecraftServer;
@@ -23,14 +23,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 // Marked as abstract so all the extends and implements clauses don't need to be "followed".
 // Those clauses are added to get easy access to things without needing to @Shadow them.
 @Mixin(MinecraftServer.class)
-public abstract class ExampleServerMixin extends ReentrantBlockableEventLoop<TickTask> implements ServerInfo, ChunkIOErrorReporter, CommandSource, AutoCloseable {
+public abstract class RefinedMonitorsServerMixin extends ReentrantBlockableEventLoop<TickTask> implements ServerInfo, ChunkIOErrorReporter, CommandSource, AutoCloseable {
     // Constructor of a Mixin gets ignored
-    public ExampleServerMixin(String pName) {
+    public RefinedMonitorsServerMixin(String pName) {
         super(pName);
     }
 
     @Inject(method = "loadLevel", at = @At("TAIL"))
-    public void examplemod$loadLevel(CallbackInfo ci) {
-        System.out.println("Example Mixin ran from server startup (modid: " + ExampleMod.MODID + ")");
+    public void refinedmonitors$loadLevel(CallbackInfo ci) {
+        System.out.println("RefinedMonitors Mixin ran from server startup (modid: " + RefinedMonitorsMod.MODID + ")");
     }
 }

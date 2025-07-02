@@ -4,7 +4,7 @@
   "package": "com.hmdyt.refinedmonitors.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "ExampleServerMixin"
+    "RefinedMonitorsServerMixin"
   ],
   "server": [],
   "client": [],
