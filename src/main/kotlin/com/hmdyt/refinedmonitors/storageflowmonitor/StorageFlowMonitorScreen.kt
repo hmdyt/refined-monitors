@@ -1,8 +1,10 @@
 package com.hmdyt.refinedmonitors.storageflowmonitor
 
-import com.mojang.blaze3d.systems.RenderSystem
+import com.refinedmods.refinedstorage.common.support.AbstractBaseScreen
+import com.refinedmods.refinedstorage.common.support.containermenu.PropertyTypes
+import com.refinedmods.refinedstorage.common.support.widget.FuzzyModeSideButtonWidget
+import com.refinedmods.refinedstorage.common.support.widget.RedstoneModeSideButtonWidget
 import net.minecraft.client.gui.GuiGraphics
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.entity.player.Inventory
@@ -11,7 +13,7 @@ class StorageFlowMonitorScreen(
     menu: StorageFlowMonitorContainerMenu,
     playerInventory: Inventory,
     title: Component,
-) : AbstractContainerScreen<StorageFlowMonitorContainerMenu>(menu, playerInventory, title) {
+) : AbstractBaseScreen<StorageFlowMonitorContainerMenu>(menu, playerInventory, title) {
     companion object {
         private val TEXTURE =
             ResourceLocation.fromNamespaceAndPath(
@@ -21,8 +23,23 @@ class StorageFlowMonitorScreen(
     }
 
     init {
-        imageWidth = 176
-        imageHeight = 166
+        inventoryLabelY = 43
+        imageWidth = 211
+        imageHeight = 137
+    }
+
+    override fun init() {
+        super.init()
+        addSideButton(RedstoneModeSideButtonWidget(menu.getProperty(PropertyTypes.REDSTONE_MODE)))
+        addSideButton(
+            FuzzyModeSideButtonWidget(
+                menu.getProperty(PropertyTypes.FUZZY_MODE),
+            ) { FuzzyModeSideButtonWidget.Type.GENERIC },
+        )
+    }
+
+    override fun getTexture(): ResourceLocation {
+        return TEXTURE
     }
 
     override fun renderBg(
@@ -31,20 +48,24 @@ class StorageFlowMonitorScreen(
         mouseX: Int,
         mouseY: Int,
     ) {
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f)
-        val x = (width - imageWidth) / 2
-        val y = (height - imageHeight) / 2
-        guiGraphics.blit(TEXTURE, x, y, 0, 0, imageWidth, imageHeight)
+        super.renderBg(guiGraphics, partialTick, mouseX, mouseY)
     }
 
-    override fun render(
+    override fun renderLabels(
         guiGraphics: GuiGraphics,
         mouseX: Int,
         mouseY: Int,
-        partialTick: Float,
     ) {
-        renderBackground(guiGraphics, mouseX, mouseY, partialTick)
-        super.render(guiGraphics, mouseX, mouseY, partialTick)
-        renderTooltip(guiGraphics, mouseX, mouseY)
+        guiGraphics.drawString(font, title, titleLabelX, titleLabelY, 4210752, false)
+        guiGraphics.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, 4210752, false)
+    }
+
+    private fun formatAmount(amount: Long): String {
+        return when {
+            amount >= 1000000000 -> "${amount / 1000000000}B"
+            amount >= 1000000 -> "${amount / 1000000}M"
+            amount >= 1000 -> "${amount / 1000}K"
+            else -> amount.toString()
+        }
     }
 }

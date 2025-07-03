@@ -10,7 +10,6 @@ import net.minecraft.client.Minecraft
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
-import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.inventory.MenuType
 import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.CreativeModeTab
@@ -86,12 +85,10 @@ class RefinedMonitorsMod {
             MENU_TYPES.register(
                 "storage_flow_monitor",
                 Supplier {
-                    MenuType(
-                        { id: Int, inventory: Inventory ->
-                            StorageFlowMonitorContainerMenu(id, inventory)
-                        },
-                        net.minecraft.world.flag.FeatureFlags.DEFAULT_FLAGS,
-                    )
+                    net.neoforged.neoforge.common.extensions.IMenuTypeExtension.create { syncId, inventory, buf ->
+                        val data = com.refinedmods.refinedstorage.common.support.resource.ResourceContainerData.STREAM_CODEC.decode(buf)
+                        StorageFlowMonitorContainerMenu(syncId, inventory, data)
+                    }
                 },
             )
 

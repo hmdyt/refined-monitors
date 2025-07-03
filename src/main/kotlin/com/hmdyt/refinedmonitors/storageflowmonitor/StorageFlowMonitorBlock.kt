@@ -86,8 +86,8 @@ class StorageFlowMonitorBlock :
         if (player.isCrouching) {
             if (!level.isClientSide) {
                 val blockEntity = level.getBlockEntity(pos)
-                if (blockEntity is StorageFlowMonitorBlockEntity) {
-                    player.openMenu(blockEntity)
+                if (blockEntity is StorageFlowMonitorBlockEntity && player is ServerPlayer) {
+                    com.refinedmods.refinedstorage.common.Platform.INSTANCE.menuOpener.openMenu(player, blockEntity)
                 }
             }
             return ItemInteractionResult.SUCCESS
