@@ -6,6 +6,7 @@ import com.hmdyt.refinedmonitors.storageflowmonitor.StorageFlowMonitorBlocks
 import com.hmdyt.refinedmonitors.storageflowmonitor.StorageFlowMonitorContainerMenu
 import com.hmdyt.refinedmonitors.storageflowmonitor.StorageFlowMonitorScreen
 import com.mojang.logging.LogUtils
+import com.refinedmods.refinedstorage.neoforge.api.RefinedStorageNeoForgeApi
 import net.minecraft.client.Minecraft
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.core.registries.Registries
@@ -27,6 +28,7 @@ import net.neoforged.fml.common.Mod
 import net.neoforged.fml.config.ModConfig
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent
 import net.neoforged.neoforge.client.event.EntityRenderersEvent
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent
 import net.neoforged.neoforge.common.NeoForge
@@ -137,6 +139,7 @@ class RefinedMonitorsMod {
 
     constructor(modEventBus: IEventBus, modContainer: ModContainer) {
         modEventBus.addListener(::commonSetup)
+        modEventBus.addListener(::registerCapabilities)
 
         BLOCKS.register(modEventBus)
         ITEMS.register(modEventBus)
@@ -162,6 +165,19 @@ class RefinedMonitorsMod {
     private fun addCreative(event: BuildCreativeModeTabContentsEvent) {
         if (event.tabKey === CreativeModeTabs.BUILDING_BLOCKS) {
             event.accept(STORAGE_FLOW_MONITOR_ITEM)
+        }
+    }
+
+    private fun registerCapabilities(event: RegisterCapabilitiesEvent) {
+        event.registerBlockEntity(
+            RefinedStorageNeoForgeApi.INSTANCE.networkNodeContainerProviderCapability,
+            STORAGE_FLOW_MONITOR_BLOCK_ENTITY.get(),
+        ) { be, _ ->
+            if (be is StorageFlowMonitorBlockEntity) {
+                be.containerProvider
+            } else {
+                null
+            }
         }
     }
 

@@ -8,8 +8,6 @@ import com.refinedmods.refinedstorage.api.network.storage.StorageNetworkComponen
 import com.refinedmods.refinedstorage.api.resource.ResourceKey
 import com.refinedmods.refinedstorage.api.storage.root.RootStorage
 import com.refinedmods.refinedstorage.common.Platform
-import com.refinedmods.refinedstorage.common.api.RefinedStorageApi
-import com.refinedmods.refinedstorage.common.api.storage.PlayerActor
 import com.refinedmods.refinedstorage.common.api.storage.root.FuzzyRootStorage
 import com.refinedmods.refinedstorage.common.api.support.resource.PlatformResourceKey
 import com.refinedmods.refinedstorage.common.support.FilterWithFuzzyMode
@@ -26,13 +24,10 @@ import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.chat.Component
 import net.minecraft.network.codec.StreamEncoder
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
-import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.InteractionHand
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.AbstractContainerMenu
 import net.minecraft.world.level.block.state.BlockState
-import org.slf4j.LoggerFactory
 
 class StorageFlowMonitorBlockEntity(
     pos: BlockPos,
@@ -45,8 +40,6 @@ class StorageFlowMonitorBlockEntity(
     ),
     NetworkNodeExtendedMenuProvider<ResourceContainerData> {
     companion object {
-        private val LOGGER = LoggerFactory.getLogger(StorageFlowMonitorBlockEntity::class.java)
-
         private const val TAG_CLIENT_FILTER = "cf"
         private const val TAG_CLIENT_AMOUNT = "ca"
         private const val TAG_CLIENT_ACTIVE = "cac"
@@ -57,25 +50,14 @@ class StorageFlowMonitorBlockEntity(
 
     private var currentAmount: Long = 0
     private var currentlyActive: Boolean = false
-    private var lastExtractTime: Long = 0
 
     init {
         val resourceContainer = ResourceContainerImpl.createForFilter(1)
         this.filter =
             FilterWithFuzzyMode.create(resourceContainer) {
-                LOGGER.info("StorageFlowMonitor filter changed at {}, resource: {}", worldPosition, resourceContainer.getResource(0))
                 setChanged()
                 sendDisplayUpdate()
             }
-    }
-
-    fun tick() {
-        if (level?.isClientSide == true) {
-            return
-        }
-
-        doWork()
-        trySendDisplayUpdate()
     }
 
     override fun doWork() {
@@ -135,78 +117,7 @@ class StorageFlowMonitorBlockEntity(
     ) {
         currentAmount = amount
         currentlyActive = active
-        LOGGER.debug("Sending display update for storage flow monitor {} with amount {}", worldPosition, amount)
         PlatformUtil.sendBlockUpdateToClient(level, worldPosition)
-    }
-
-    fun insert(
-        player: Player,
-        hand: InteractionHand,
-    ) {
-        if (level == null) {
-            return
-        }
-
-        LOGGER.info("StorageFlowMonitor insert called by player: ${player.name.string}")
-
-        // TODO: RS2ネットワークへの挿入処理を実装
-        if (doInsert(player, hand)) {
-            sendDisplayUpdate()
-        }
-    }
-
-    private fun doInsert(
-        player: Player,
-        hand: InteractionHand,
-    ): Boolean {
-        val network = mainNetworkNode.network ?: return false
-        val configuredResource = getConfiguredResource() ?: return false
-        val stack = player.getItemInHand(hand)
-
-        if (stack.isEmpty) return false
-
-        val result =
-            RefinedStorageApi.INSTANCE.storageMonitorInsertionStrategy.insert(
-                configuredResource,
-                stack,
-                PlayerActor(player),
-                network,
-            )
-
-        if (result.isPresent) {
-            player.setItemInHand(hand, result.get())
-            return true
-        }
-
-        return false
-    }
-
-    fun extract(player: ServerPlayer) {
-        if (level == null) {
-            return
-        }
-
-        LOGGER.info("StorageFlowMonitor extract called by player: ${player.name.string}")
-
-        // TODO: RS2ネットワークからの抽出処理を実装
-        val extracted = doExtract(player)
-        if (extracted) {
-            lastExtractTime = System.currentTimeMillis()
-            sendDisplayUpdate()
-        }
-    }
-
-    private fun doExtract(player: ServerPlayer): Boolean {
-        val network = mainNetworkNode.network ?: return false
-        val configuredResource = getConfiguredResource() ?: return false
-
-        return RefinedStorageApi.INSTANCE.storageMonitorExtractionStrategy.extract(
-            configuredResource,
-            !player.isShiftKeyDown,
-            player,
-            PlayerActor(player),
-            network,
-        )
     }
 
     override fun writeConfiguration(
@@ -270,7 +181,7 @@ class StorageFlowMonitorBlockEntity(
     }
 
     fun isCurrentlyActive(): Boolean {
-        return currentlyActive
+        return mainNetworkNode.isActive
     }
 
     fun getConfiguredResource(): PlatformResourceKey? {
@@ -295,6 +206,16 @@ class StorageFlowMonitorBlockEntity(
 
     override fun setRedstoneMode(redstoneMode: RedstoneMode) {
         super.setRedstoneMode(redstoneMode)
+    }
+
+    override fun doesBlockStateChangeWarrantNetworkNodeUpdate(
+        oldBlockState: BlockState,
+        newBlockState: BlockState,
+    ): Boolean {
+        return com.refinedmods.refinedstorage.common.support.AbstractDirectionalBlock.didDirectionChange(
+            oldBlockState,
+            newBlockState,
+        )
     }
 
     fun getFilter(): FilterWithFuzzyMode {

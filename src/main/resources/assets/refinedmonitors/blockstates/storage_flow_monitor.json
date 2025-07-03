@@ -1,27 +1,57 @@
 {
   "variants": {
-    "facing=north": {
-      "model": "refinedmonitors:block/storage_flow_monitor"
-    },
-    "facing=south": {
+    "direction=down_east": {
       "model": "refinedmonitors:block/storage_flow_monitor",
+      "x": 90,
+      "y": -90
+    },
+    "direction=down_north": {
+      "model": "refinedmonitors:block/storage_flow_monitor",
+      "x": 90
+    },
+    "direction=down_south": {
+      "model": "refinedmonitors:block/storage_flow_monitor",
+      "x": 90,
       "y": 180
     },
-    "facing=west": {
+    "direction=down_west": {
       "model": "refinedmonitors:block/storage_flow_monitor",
-      "y": 270
+      "x": 90,
+      "y": 90
     },
-    "facing=east": {
+    "direction=east": {
       "model": "refinedmonitors:block/storage_flow_monitor",
       "y": 90
     },
-    "facing=up": {
-      "model": "refinedmonitors:block/storage_flow_monitor",
-      "x": 270
+    "direction=north": {
+      "model": "refinedmonitors:block/storage_flow_monitor"
     },
-    "facing=down": {
+    "direction=south": {
       "model": "refinedmonitors:block/storage_flow_monitor",
-      "x": 90
+      "y": 180
+    },
+    "direction=up_east": {
+      "model": "refinedmonitors:block/storage_flow_monitor",
+      "x": -90,
+      "y": -90
+    },
+    "direction=up_north": {
+      "model": "refinedmonitors:block/storage_flow_monitor",
+      "x": -90,
+      "y": 180
+    },
+    "direction=up_south": {
+      "model": "refinedmonitors:block/storage_flow_monitor",
+      "x": -90
+    },
+    "direction=up_west": {
+      "model": "refinedmonitors:block/storage_flow_monitor",
+      "x": -90,
+      "y": 90
+    },
+    "direction=west": {
+      "model": "refinedmonitors:block/storage_flow_monitor",
+      "y": 270
     }
   }
 }

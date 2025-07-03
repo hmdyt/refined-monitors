@@ -8,7 +8,6 @@ import net.minecraft.client.gui.Font
 import net.minecraft.client.renderer.LightTexture
 import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer
-import net.minecraft.core.Direction
 import net.minecraft.util.Mth
 import net.minecraft.world.level.Level
 import org.joml.Quaternionf
@@ -34,7 +33,10 @@ class StorageFlowMonitorBlockEntityRenderer : BlockEntityRenderer<StorageFlowMon
             return
         }
 
-        val resource = blockEntity.getConfiguredResource() ?: return
+        val resource = blockEntity.getConfiguredResource()
+        if (resource == null) {
+            return
+        }
 
         doRender(
             level,
@@ -49,10 +51,10 @@ class StorageFlowMonitorBlockEntityRenderer : BlockEntityRenderer<StorageFlowMon
     private fun getDirection(
         blockEntity: StorageFlowMonitorBlockEntity,
         level: Level,
-    ): Direction? {
+    ): com.refinedmods.refinedstorage.common.support.direction.BiDirection? {
         val state = level.getBlockState(blockEntity.blockPos)
         return if (state.block is StorageFlowMonitorBlock) {
-            state.getValue(StorageFlowMonitorBlock.FACING)
+            state.getValue(com.refinedmods.refinedstorage.common.support.direction.BiDirectionType.INSTANCE.property)
         } else {
             null
         }
@@ -62,89 +64,74 @@ class StorageFlowMonitorBlockEntityRenderer : BlockEntityRenderer<StorageFlowMon
         level: Level,
         poseStack: PoseStack,
         vertexConsumers: MultiBufferSource,
-        direction: Direction,
-        resource: ResourceKey,
-        amount: Long,
-    ) {
-        poseStack.pushPose()
-
-        poseStack.translate(0.5, 0.5, 0.5)
-
-        when (direction) {
-            Direction.NORTH -> {}
-            Direction.SOUTH -> poseStack.mulPose(Quaternionf().rotationY(Mth.DEG_TO_RAD * 180))
-            Direction.WEST -> poseStack.mulPose(Quaternionf().rotationY(Mth.DEG_TO_RAD * 90))
-            Direction.EAST -> poseStack.mulPose(Quaternionf().rotationY(Mth.DEG_TO_RAD * -90))
-            Direction.UP -> poseStack.mulPose(Quaternionf().rotationX(Mth.DEG_TO_RAD * -90))
-            Direction.DOWN -> poseStack.mulPose(Quaternionf().rotationX(Mth.DEG_TO_RAD * 90))
-        }
-
-        poseStack.translate(0.0, 0.0, -0.501)
-
-        renderResource(level, poseStack, vertexConsumers, resource, amount)
-
-        poseStack.popPose()
-    }
-
-    private fun renderResource(
-        level: Level,
-        poseStack: PoseStack,
-        vertexConsumers: MultiBufferSource,
+        direction: com.refinedmods.refinedstorage.common.support.direction.BiDirection,
         resource: ResourceKey,
         amount: Long,
     ) {
         val resourceRendering = RefinedStorageClientApi.INSTANCE.getResourceRendering(resource::class.java)
         if (resourceRendering != null) {
-            poseStack.pushPose()
-
-            poseStack.scale(0.5f, 0.5f, 0.01f)
-            poseStack.translate(0.0, 0.5, 0.0)
-
-            resourceRendering.render(resource, poseStack, vertexConsumers, LightTexture.FULL_BRIGHT, level)
-
-            poseStack.popPose()
-
-            renderAmount(poseStack, vertexConsumers, amount)
+            doRender(
+                poseStack,
+                vertexConsumers,
+                direction.quaternion,
+                resourceRendering.formatAmount(amount),
+                level,
+                resourceRendering,
+                resource,
+            )
         }
     }
 
-    private fun renderAmount(
+    private fun doRender(
         poseStack: PoseStack,
-        vertexConsumers: MultiBufferSource,
-        amount: Long,
+        renderTypeBuffer: MultiBufferSource,
+        rotation: Quaternionf,
+        amount: String,
+        level: Level,
+        resourceRendering: com.refinedmods.refinedstorage.common.api.support.resource.ResourceRendering,
+        resource: ResourceKey,
     ) {
-        val minecraft = Minecraft.getInstance()
-        val font = minecraft.font
-        val text = formatAmount(amount)
+        poseStack.pushPose()
+
+        poseStack.translate(0.5, 0.5, 0.5)
+        poseStack.mulPose(rotation)
+        poseStack.mulPose(ROTATE_TO_FRONT)
+        poseStack.translate(0.0, 0.05, 0.5)
 
         poseStack.pushPose()
-        poseStack.translate(0.0, FONT_SPACING.toDouble(), 0.001)
-        poseStack.scale(0.02f, -0.02f, 0.02f)
-        poseStack.mulPose(ROTATE_TO_FRONT)
+        renderAmount(poseStack, renderTypeBuffer, amount)
+        poseStack.popPose()
 
-        val textWidth = font.width(text)
-        font.drawInBatch(
-            text,
-            -textWidth / 2f,
-            0f,
-            0xFFFFFF,
-            false,
-            poseStack.last().pose(),
-            vertexConsumers,
-            Font.DisplayMode.NORMAL,
-            0,
-            LightTexture.FULL_BRIGHT,
-        )
+        poseStack.pushPose()
+        poseStack.translate(0.0, 0.0, 0.01)
+        resourceRendering.render(resource, poseStack, renderTypeBuffer, LightTexture.FULL_BRIGHT, level)
+        poseStack.popPose()
 
         poseStack.popPose()
     }
 
-    private fun formatAmount(amount: Long): String {
-        return when {
-            amount >= 1000000000 -> "${amount / 1000000000}B"
-            amount >= 1000000 -> "${amount / 1000000}M"
-            amount >= 1000 -> "${amount / 1000}K"
-            else -> amount.toString()
-        }
+    private fun renderAmount(
+        poseStack: PoseStack,
+        renderTypeBuffer: MultiBufferSource,
+        amount: String,
+    ) {
+        val font = Minecraft.getInstance().font
+        val width = font.width(amount)
+        poseStack.translate(0.0, FONT_SPACING.toDouble(), 0.02)
+        poseStack.scale(1.0f / 62.0f, -1.0f / 62.0f, 1.0f / 62.0f)
+        poseStack.scale(0.5f, 0.5f, 0f)
+        poseStack.translate(-0.5 * width, 0.0, 0.5)
+        font.drawInBatch(
+            amount,
+            0f,
+            0f,
+            0xFFFFFF,
+            false,
+            poseStack.last().pose(),
+            renderTypeBuffer,
+            Font.DisplayMode.NORMAL,
+            0,
+            LightTexture.FULL_BRIGHT,
+        )
     }
 }
