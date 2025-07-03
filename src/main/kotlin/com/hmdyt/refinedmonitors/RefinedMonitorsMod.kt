@@ -69,12 +69,12 @@ class RefinedMonitorsMod {
         val STORAGE_FLOW_MONITOR: DeferredBlock<Block> =
             BLOCKS.register("storage_flow_monitor", Supplier { StorageFlowMonitorBlocks.STORAGE_FLOW_MONITOR })
 
-        val STORAGE_FLOW_MONITOR_BLOCK_ENTITY: DeferredHolder<BlockEntityType<*>, BlockEntityType<*>> =
+        val STORAGE_FLOW_MONITOR_BLOCK_ENTITY: DeferredHolder<BlockEntityType<*>, BlockEntityType<StorageFlowMonitorBlockEntity>> =
             BLOCK_ENTITIES.register(
                 "storage_flow_monitor",
                 Supplier {
                     BlockEntityType.Builder.of(
-                        { pos, state -> StorageFlowMonitorBlocks.STORAGE_FLOW_MONITOR.newBlockEntity(pos, state) },
+                        { pos, state -> StorageFlowMonitorBlockEntity(pos, state) },
                         StorageFlowMonitorBlocks.STORAGE_FLOW_MONITOR,
                     ).build(null)
                 },
@@ -121,7 +121,7 @@ class RefinedMonitorsMod {
             @SubscribeEvent
             fun onRegisterRenderers(event: EntityRenderersEvent.RegisterRenderers) {
                 event.registerBlockEntityRenderer(
-                    STORAGE_FLOW_MONITOR_BLOCK_ENTITY.get() as BlockEntityType<StorageFlowMonitorBlockEntity>,
+                    STORAGE_FLOW_MONITOR_BLOCK_ENTITY.get(),
                 ) { context ->
                     StorageFlowMonitorBlockEntityRenderer()
                 }

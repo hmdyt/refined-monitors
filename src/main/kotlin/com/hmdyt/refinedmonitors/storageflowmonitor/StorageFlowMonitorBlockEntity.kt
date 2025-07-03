@@ -5,7 +5,6 @@ import com.hmdyt.refinedmonitors.RefinedMonitorsMod
 import com.refinedmods.refinedstorage.api.network.Network
 import com.refinedmods.refinedstorage.api.network.impl.node.SimpleNetworkNode
 import com.refinedmods.refinedstorage.api.network.storage.StorageNetworkComponent
-import com.refinedmods.refinedstorage.api.resource.ResourceKey
 import com.refinedmods.refinedstorage.api.storage.root.RootStorage
 import com.refinedmods.refinedstorage.common.Platform
 import com.refinedmods.refinedstorage.common.api.storage.root.FuzzyRootStorage
@@ -28,6 +27,7 @@ import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.AbstractContainerMenu
 import net.minecraft.world.level.block.state.BlockState
+import org.slf4j.LoggerFactory
 
 class StorageFlowMonitorBlockEntity(
     pos: BlockPos,
@@ -43,6 +43,7 @@ class StorageFlowMonitorBlockEntity(
         private const val TAG_CLIENT_FILTER = "cf"
         private const val TAG_CLIENT_AMOUNT = "ca"
         private const val TAG_CLIENT_ACTIVE = "cac"
+        private val LOGGER = LoggerFactory.getLogger(StorageFlowMonitorBlockEntity::class.java)
     }
 
     private val filter: FilterWithFuzzyMode
@@ -58,6 +59,13 @@ class StorageFlowMonitorBlockEntity(
                 setChanged()
                 sendDisplayUpdate()
             }
+    }
+
+    override fun onLoad() {
+        super.onLoad()
+        if (level != null && !level!!.isClientSide) {
+            sendDisplayUpdate()
+        }
     }
 
     override fun doWork() {
@@ -87,7 +95,7 @@ class StorageFlowMonitorBlockEntity(
 
     private fun getAmount(
         network: Network,
-        configuredResource: ResourceKey,
+        configuredResource: com.refinedmods.refinedstorage.common.api.support.resource.PlatformResourceKey,
     ): Long {
         val rootStorage: RootStorage = network.getComponent(StorageNetworkComponent::class.java)
         if (!filter.isFuzzyMode || rootStorage !is FuzzyRootStorage) {
@@ -117,6 +125,7 @@ class StorageFlowMonitorBlockEntity(
     ) {
         currentAmount = amount
         currentlyActive = active
+        LOGGER.debug("Sending display update for storage flow monitor {} with amount {} and active {}", worldPosition, amount, active)
         PlatformUtil.sendBlockUpdateToClient(level, worldPosition)
     }
 
@@ -181,10 +190,15 @@ class StorageFlowMonitorBlockEntity(
     }
 
     fun isCurrentlyActive(): Boolean {
-        return mainNetworkNode.isActive
+        val isClientSide = level?.isClientSide ?: false
+        return if (isClientSide) {
+            currentlyActive
+        } else {
+            mainNetworkNode.isActive
+        }
     }
 
-    fun getConfiguredResource(): PlatformResourceKey? {
+    fun getConfiguredResource(): com.refinedmods.refinedstorage.common.api.support.resource.PlatformResourceKey? {
         return filter.filterContainer.getResource(0)
     }
 
