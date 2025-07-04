@@ -10,7 +10,6 @@ import com.refinedmods.refinedstorage.common.Platform
 import com.refinedmods.refinedstorage.common.api.storage.root.FuzzyRootStorage
 import com.refinedmods.refinedstorage.common.api.support.resource.PlatformResourceKey
 import com.refinedmods.refinedstorage.common.support.FilterWithFuzzyMode
-import com.refinedmods.refinedstorage.common.support.RedstoneMode
 import com.refinedmods.refinedstorage.common.support.containermenu.NetworkNodeExtendedMenuProvider
 import com.refinedmods.refinedstorage.common.support.network.AbstractBaseNetworkNodeContainerBlockEntity
 import com.refinedmods.refinedstorage.common.support.resource.ResourceContainerData
@@ -63,26 +62,22 @@ class StorageFlowMonitorBlockEntity(
 
     override fun onLoad() {
         super.onLoad()
-        if (level != null && !level!!.isClientSide) {
-            sendDisplayUpdate()
-        }
+        level ?: return
+        level!!.isClientSide && return
+        sendDisplayUpdate()
     }
 
     override fun doWork() {
         super.doWork()
-        if (level == null) {
-            return
-        }
         trySendDisplayUpdate()
     }
 
     private fun trySendDisplayUpdate() {
-        if (level == null) {
-            return
-        }
+        level ?: return
+        !displayUpdateRateLimiter.tryAcquire() && return
         val amount = getAmount()
         val active = mainNetworkNode.isActive
-        if ((amount != currentAmount || active != currentlyActive) && displayUpdateRateLimiter.tryAcquire()) {
+        if (amount != currentAmount || active != currentlyActive) {
             sendDisplayUpdate(level!!, amount, active)
         }
     }
@@ -95,7 +90,7 @@ class StorageFlowMonitorBlockEntity(
 
     private fun getAmount(
         network: Network,
-        configuredResource: com.refinedmods.refinedstorage.common.api.support.resource.PlatformResourceKey,
+        configuredResource: PlatformResourceKey,
     ): Long {
         val rootStorage: RootStorage = network.getComponent(StorageNetworkComponent::class.java)
         if (!filter.isFuzzyMode || rootStorage !is FuzzyRootStorage) {
@@ -107,14 +102,8 @@ class StorageFlowMonitorBlockEntity(
             .sum()
     }
 
-    private fun isActive(): Boolean {
-        return mainNetworkNode.isActive
-    }
-
     private fun sendDisplayUpdate() {
-        if (level == null) {
-            return
-        }
+        level ?: return
         sendDisplayUpdate(level!!, getAmount(), mainNetworkNode.isActive)
     }
 
@@ -198,7 +187,7 @@ class StorageFlowMonitorBlockEntity(
         }
     }
 
-    fun getConfiguredResource(): com.refinedmods.refinedstorage.common.api.support.resource.PlatformResourceKey? {
+    fun getConfiguredResource(): PlatformResourceKey? {
         return filter.filterContainer.getResource(0)
     }
 
@@ -212,14 +201,6 @@ class StorageFlowMonitorBlockEntity(
 
     fun setFuzzyMode(fuzzyMode: Boolean) {
         filter.isFuzzyMode = fuzzyMode
-    }
-
-    override fun getRedstoneMode(): RedstoneMode {
-        return super.getRedstoneMode()
-    }
-
-    override fun setRedstoneMode(redstoneMode: RedstoneMode) {
-        super.setRedstoneMode(redstoneMode)
     }
 
     override fun doesBlockStateChangeWarrantNetworkNodeUpdate(

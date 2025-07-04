@@ -3,6 +3,7 @@ package com.hmdyt.refinedmonitors.storageflowmonitor
 import com.mojang.blaze3d.vertex.PoseStack
 import com.refinedmods.refinedstorage.common.api.RefinedStorageClientApi
 import com.refinedmods.refinedstorage.common.api.support.resource.PlatformResourceKey
+import com.refinedmods.refinedstorage.common.api.support.resource.ResourceRendering
 import com.refinedmods.refinedstorage.common.support.resource.ItemResource
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.Font
@@ -65,7 +66,7 @@ class StorageFlowMonitorBlockEntityRenderer : BlockEntityRenderer<StorageFlowMon
         poseStack: PoseStack,
         vertexConsumers: MultiBufferSource,
         direction: com.refinedmods.refinedstorage.common.support.direction.BiDirection,
-        resource: com.refinedmods.refinedstorage.common.api.support.resource.PlatformResourceKey,
+        resource: PlatformResourceKey,
         amount: Long,
     ) {
         val resourceClass =
@@ -74,21 +75,17 @@ class StorageFlowMonitorBlockEntityRenderer : BlockEntityRenderer<StorageFlowMon
                 else -> resource.javaClass
             }
 
-        val resourceRendering = RefinedStorageClientApi.INSTANCE.getResourceRendering(resourceClass)
+        val resourceRendering = RefinedStorageClientApi.INSTANCE.getResourceRendering(resourceClass) ?: return
 
-        if (resourceRendering != null) {
-            doRender(
-                poseStack,
-                vertexConsumers,
-                direction.quaternion,
-                resourceRendering.formatAmount(amount),
-                level,
-                resourceRendering,
-                resource,
-            )
-        } else {
-            LOGGER.error("ResourceRendering is null for resource class: {}, resource: {}", resourceClass, resource)
-        }
+        doRender(
+            poseStack,
+            vertexConsumers,
+            direction.quaternion,
+            resourceRendering.formatAmount(amount),
+            level,
+            resourceRendering,
+            resource,
+        )
     }
 
     private fun doRender(
@@ -97,8 +94,8 @@ class StorageFlowMonitorBlockEntityRenderer : BlockEntityRenderer<StorageFlowMon
         rotation: Quaternionf,
         amount: String,
         level: Level,
-        resourceRendering: com.refinedmods.refinedstorage.common.api.support.resource.ResourceRendering,
-        resource: com.refinedmods.refinedstorage.common.api.support.resource.PlatformResourceKey,
+        resourceRendering: ResourceRendering,
+        resource: PlatformResourceKey,
     ) {
         poseStack.pushPose()
 
