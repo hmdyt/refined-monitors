@@ -1,9 +1,5 @@
 package com.hmdyt.refinedmonitors
 
-import com.hmdyt.refinedmonitors.storagecapacitymonitor.StorageCapacityMonitorBlockEntity
-import com.hmdyt.refinedmonitors.storagecapacitymonitor.StorageCapacityMonitorBlocks
-import com.hmdyt.refinedmonitors.storagecapacitymonitor.StorageCapacityMonitorContainerMenu
-import com.hmdyt.refinedmonitors.storagecapacitymonitor.StorageCapacityMonitorScreen
 import com.hmdyt.refinedmonitors.storageflowmonitor.StorageFlowMonitorBlockEntity
 import com.hmdyt.refinedmonitors.storageflowmonitor.StorageFlowMonitorBlockEntityRenderer
 import com.hmdyt.refinedmonitors.storageflowmonitor.StorageFlowMonitorBlocks
@@ -98,34 +94,6 @@ class RefinedMonitorsMod {
                 },
             )
 
-        val STORAGE_CAPACITY_MONITOR: DeferredBlock<Block> =
-            BLOCKS.register("storage_capacity_monitor", Supplier { StorageCapacityMonitorBlocks.STORAGE_CAPACITY_MONITOR })
-
-        val STORAGE_CAPACITY_MONITOR_BLOCK_ENTITY: DeferredHolder<BlockEntityType<*>, BlockEntityType<StorageCapacityMonitorBlockEntity>> =
-            BLOCK_ENTITIES.register(
-                "storage_capacity_monitor",
-                Supplier {
-                    BlockEntityType.Builder.of(
-                        { pos, state -> StorageCapacityMonitorBlockEntity(pos, state) },
-                        StorageCapacityMonitorBlocks.STORAGE_CAPACITY_MONITOR,
-                    ).build(null)
-                },
-            )
-
-        val STORAGE_CAPACITY_MONITOR_ITEM: DeferredItem<BlockItem> =
-            ITEMS.registerSimpleBlockItem("storage_capacity_monitor", STORAGE_CAPACITY_MONITOR)
-
-        val STORAGE_CAPACITY_MONITOR_MENU_TYPE: DeferredHolder<MenuType<*>, MenuType<StorageCapacityMonitorContainerMenu>> =
-            MENU_TYPES.register(
-                "storage_capacity_monitor",
-                Supplier {
-                    net.neoforged.neoforge.common.extensions.IMenuTypeExtension.create { syncId, inventory, buf ->
-                        val data = com.refinedmods.refinedstorage.common.support.resource.ResourceContainerData.STREAM_CODEC.decode(buf)
-                        StorageCapacityMonitorContainerMenu(syncId, inventory, data)
-                    }
-                },
-            )
-
         val REFINED_MONITORS_TAB: DeferredHolder<CreativeModeTab, CreativeModeTab> =
             CREATIVE_MODE_TABS.register(
                 "refined_monitors_tab",
@@ -138,7 +106,6 @@ class RefinedMonitorsMod {
                         .icon { STORAGE_FLOW_MONITOR_ITEM.get().defaultInstance }
                         .displayItems { parameters: ItemDisplayParameters?, output: CreativeModeTab.Output ->
                             output.accept(STORAGE_FLOW_MONITOR_ITEM.get())
-                            output.accept(STORAGE_CAPACITY_MONITOR_ITEM.get())
                         }.build()
                 },
             )
@@ -165,10 +132,6 @@ class RefinedMonitorsMod {
                 event.register(
                     STORAGE_FLOW_MONITOR_MENU_TYPE.get() as MenuType<StorageFlowMonitorContainerMenu>,
                     ::StorageFlowMonitorScreen,
-                )
-                event.register(
-                    STORAGE_CAPACITY_MONITOR_MENU_TYPE.get() as MenuType<StorageCapacityMonitorContainerMenu>,
-                    ::StorageCapacityMonitorScreen,
                 )
             }
         }
@@ -211,16 +174,6 @@ class RefinedMonitorsMod {
             STORAGE_FLOW_MONITOR_BLOCK_ENTITY.get(),
         ) { be, _ ->
             if (be is StorageFlowMonitorBlockEntity) {
-                be.containerProvider
-            } else {
-                null
-            }
-        }
-        event.registerBlockEntity(
-            RefinedStorageNeoForgeApi.INSTANCE.networkNodeContainerProviderCapability,
-            STORAGE_CAPACITY_MONITOR_BLOCK_ENTITY.get(),
-        ) { be, _ ->
-            if (be is StorageCapacityMonitorBlockEntity) {
                 be.containerProvider
             } else {
                 null

@@ -2,11 +2,5 @@
   "itemGroup.refinedmonitors": "Refined Monitors Tab",
   "block.refinedmonitors.storage_flow_monitor": "Storage Flow Monitor",
   "item.refinedmonitors.storage_flow_monitor.help": "Shows the amount and flow rate of a specific resource in the network",
-  "gui.refinedmonitors.storage_flow_monitor.filter_help": "Set filter item",
-  "gui.refinedmonitors.storage_flow_monitor.flow_rate": "Flow Rate: %s",
-  "gui.refinedmonitors.storage_flow_monitor.amount": "Amount: %s",
-  "gui.refinedmonitors.storage_flow_monitor.flow_rate.unit.per_second": "/s",
-  "gui.refinedmonitors.storage_flow_monitor.flow_rate.unit.per_minute": "/min",
-  "block.refinedmonitors.storage_capacity_monitor": "Storage Capacity Monitor",
-  "item.refinedmonitors.storage_capacity_monitor.help": "Shows total used and available storage capacity in the network"
+  "gui.refinedmonitors.storage_flow_monitor.filter_help": "Set filter item"
 }
