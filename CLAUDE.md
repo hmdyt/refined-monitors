@@ -4,25 +4,20 @@
 これは**Refined Monitors**、Refined Storage 2を拡張するNeoForge 1.21.1用のMinecraftModです。このプロジェクトはKotlinで構築され、Mixin部分にはJavaを使用し、最新のNeoForge開発手法に従っています。
 
 ## 開発における注意点
-- stepごとにformatとbuildを実行する
+- 実装にかかる前に理想状態をgameTestにテストとして記述し、そのテストが想定通り失敗になることを確認する
+- stepごとにtestとformatとbuildを実行する
 - 絶対にコードにコメントを残さない
 
 ## 主要な開発コマンド
 
 ### ビルドとテスト
 ```bash
-./gradlew build                 # Modをビルド（ktlintチェックを含む）
-./gradlew ktlintFormat         # Kotlinコードを自動フォーマット（ビルド前に実行）
-./gradlew clean                # ビルド成果物をクリーンアップ
+./gradlew runGameTest            # GameTestを実行
+./gradlew build                  # Modをビルド（ktlintチェックを含む）
+./gradlew ktlintFormat           # Kotlinコードを自動フォーマット（ビルド前に実行）
+./gradlew clean                  # ビルド成果物をクリーンアップ
 ./gradlew --refresh-dependencies # 必要に応じて依存関係を更新
-```
-
-### Modの実行
-```bash
-./gradlew runClient            # ModがロードされたMinecraftクライアントを起動
-./gradlew runServer            # 専用サーバーを起動
-./gradlew runData              # Modのデータ/リソースを生成
-```
+``
 
 ### コード品質
 ```bash
@@ -61,12 +56,6 @@ NeoForgeのDeferredRegisterシステムを使用：
 
 ## 重要な開発ノート
 
-### Mixinガイドライン
-- **MixinにはJavaを常に使用** - Kotlinバイトコード互換性の問題が存在
-- Mixinは`com.hmdyt.refinedmonitors.mixin`パッケージ内
-- 適切なMixinメソッドプレフィックスを使用: `refinedmonitors$methodName`
-- 設定: `src/main/templates/refinedmonitors.mixins.json`
-
 ### コードスタイル
 - プロジェクトはKotlinフォーマットにktlintを使用
 - **ビルド前に常に`./gradlew ktlintFormat`を実行**
@@ -81,12 +70,6 @@ NeoForgeのDeferredRegisterシステムを使用：
 - 主要依存関係: Refined Storage 2（GitHubパッケージ経由でアクセス）
 - Kotlin言語サポートにKotlinForForge (KFF) 5.6.0を使用
 - Java 21ターゲット（Mojangの配布に従う）
-
-## IDE推奨
-
-**推奨**: IntelliJ IDEA with Minecraft Development Plugin
-- KotlinエクスペリエンスはEclipseより大幅に優れています
-- 実行設定を生成するには`./gradlew genIntellijRuns`を使用
 
 ## 一般的なパターン
 
@@ -105,26 +88,7 @@ NeoForgeのDeferredRegisterシステムを使用：
 - `run/logs/`でログが利用可能
 - インタラクティブテストには`runClient`を使用
 
-## GameTestの実行
-```bash
-./gradlew runGameTestServer      # GameTestサーバーを実行してテストを自動実行
-```
-
 ## GameTestHelper 使用ガイド
-
-### 基本的なテスト構造
-```kotlin
-@GameTestHolder(RefinedMonitorsMod.MODID)
-@PrefixGameTestTemplate(false)
-object MyGameTest {
-    @GameTest(template = "empty")
-    @JvmStatic
-    fun testSomething(helper: GameTestHelper) {
-        // テストロジック
-        helper.succeed()
-    }
-}
-```
 
 ### ブロック操作
 ```kotlin
@@ -287,11 +251,6 @@ helper.placeAt(player, ItemStack(Items.TORCH), pos, Direction.UP)
 
 ### エラーハンドリング
 ```kotlin
-// 手動でテスト失敗
-helper.fail("Something went wrong")
-helper.fail("Block not found", pos)
-helper.fail("Entity issue", entity)
-
 // エラーメッセージ付きアサーション
 helper.assertBlock(pos, { block -> block == Blocks.STONE }, "Expected stone block")
 ```
