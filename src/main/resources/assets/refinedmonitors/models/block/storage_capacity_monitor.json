@@ -1,0 +1,9 @@
+{
+  "parent": "block/orientable",
+  "textures": {
+    "top": "refinedmonitors:block/storage_capacity_monitor/top",
+    "front": "refinedmonitors:block/storage_capacity_monitor/front",
+    "side": "refinedmonitors:block/side",
+    "bottom": "refinedmonitors:block/bottom"
+  }
+}

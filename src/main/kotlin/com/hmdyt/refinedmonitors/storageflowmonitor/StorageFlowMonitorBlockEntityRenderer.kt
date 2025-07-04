@@ -3,6 +3,9 @@ package com.hmdyt.refinedmonitors.storageflowmonitor
 import com.mojang.blaze3d.vertex.PoseStack
 import com.refinedmods.refinedstorage.common.api.RefinedStorageClientApi
 import com.refinedmods.refinedstorage.common.api.support.resource.PlatformResourceKey
+import com.refinedmods.refinedstorage.common.api.support.resource.ResourceRendering
+import com.refinedmods.refinedstorage.common.support.direction.BiDirection
+import com.refinedmods.refinedstorage.common.support.direction.BiDirectionType
 import com.refinedmods.refinedstorage.common.support.resource.ItemResource
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.Font
@@ -45,16 +48,17 @@ class StorageFlowMonitorBlockEntityRenderer : BlockEntityRenderer<StorageFlowMon
             direction,
             resource,
             blockEntity.getCurrentAmount(),
+            blockEntity.getFlowRateDisplayText(),
         )
     }
 
     private fun getDirection(
         blockEntity: StorageFlowMonitorBlockEntity,
         level: Level,
-    ): com.refinedmods.refinedstorage.common.support.direction.BiDirection? {
+    ): BiDirection? {
         val state = level.getBlockState(blockEntity.blockPos)
         return if (state.block is StorageFlowMonitorBlock) {
-            state.getValue(com.refinedmods.refinedstorage.common.support.direction.BiDirectionType.INSTANCE.property)
+            state.getValue(BiDirectionType.INSTANCE.property)
         } else {
             null
         }
@@ -64,9 +68,10 @@ class StorageFlowMonitorBlockEntityRenderer : BlockEntityRenderer<StorageFlowMon
         level: Level,
         poseStack: PoseStack,
         vertexConsumers: MultiBufferSource,
-        direction: com.refinedmods.refinedstorage.common.support.direction.BiDirection,
-        resource: com.refinedmods.refinedstorage.common.api.support.resource.PlatformResourceKey,
+        direction: BiDirection,
+        resource: PlatformResourceKey,
         amount: Long,
+        flowRate: String,
     ) {
         val resourceClass =
             when (resource) {
@@ -82,6 +87,7 @@ class StorageFlowMonitorBlockEntityRenderer : BlockEntityRenderer<StorageFlowMon
                 vertexConsumers,
                 direction.quaternion,
                 resourceRendering.formatAmount(amount),
+                flowRate,
                 level,
                 resourceRendering,
                 resource,
@@ -96,9 +102,10 @@ class StorageFlowMonitorBlockEntityRenderer : BlockEntityRenderer<StorageFlowMon
         renderTypeBuffer: MultiBufferSource,
         rotation: Quaternionf,
         amount: String,
+        rate: String,
         level: Level,
-        resourceRendering: com.refinedmods.refinedstorage.common.api.support.resource.ResourceRendering,
-        resource: com.refinedmods.refinedstorage.common.api.support.resource.PlatformResourceKey,
+        resourceRendering: ResourceRendering,
+        resource: PlatformResourceKey,
     ) {
         poseStack.pushPose()
 
@@ -109,6 +116,11 @@ class StorageFlowMonitorBlockEntityRenderer : BlockEntityRenderer<StorageFlowMon
 
         poseStack.pushPose()
         renderAmount(poseStack, renderTypeBuffer, amount)
+        poseStack.popPose()
+
+        poseStack.pushPose()
+        poseStack.translate(0.0, -0.15, 0.0)
+        renderRate(poseStack, renderTypeBuffer, rate)
         poseStack.popPose()
 
         poseStack.pushPose()
@@ -132,6 +144,31 @@ class StorageFlowMonitorBlockEntityRenderer : BlockEntityRenderer<StorageFlowMon
         poseStack.translate(-0.5 * width, 0.0, 0.5)
         font.drawInBatch(
             amount,
+            0f,
+            0f,
+            0xFFFFFF,
+            false,
+            poseStack.last().pose(),
+            renderTypeBuffer,
+            Font.DisplayMode.NORMAL,
+            0,
+            LightTexture.FULL_BRIGHT,
+        )
+    }
+
+    private fun renderRate(
+        poseStack: PoseStack,
+        renderTypeBuffer: MultiBufferSource,
+        rate: String,
+    ) {
+        val font = Minecraft.getInstance().font
+        val width = font.width(rate)
+        poseStack.translate(0.0, FONT_SPACING.toDouble(), 0.02)
+        poseStack.scale(1.0f / 62.0f, -1.0f / 62.0f, 1.0f / 62.0f)
+        poseStack.scale(0.5f, 0.5f, 0f)
+        poseStack.translate(-0.5 * width, 0.0, 0.5)
+        font.drawInBatch(
+            rate,
             0f,
             0f,
             0xFFFFFF,

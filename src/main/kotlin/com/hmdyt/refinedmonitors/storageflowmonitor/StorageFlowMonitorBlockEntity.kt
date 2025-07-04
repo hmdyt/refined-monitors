@@ -10,7 +10,6 @@ import com.refinedmods.refinedstorage.common.Platform
 import com.refinedmods.refinedstorage.common.api.storage.root.FuzzyRootStorage
 import com.refinedmods.refinedstorage.common.api.support.resource.PlatformResourceKey
 import com.refinedmods.refinedstorage.common.support.FilterWithFuzzyMode
-import com.refinedmods.refinedstorage.common.support.RedstoneMode
 import com.refinedmods.refinedstorage.common.support.containermenu.NetworkNodeExtendedMenuProvider
 import com.refinedmods.refinedstorage.common.support.network.AbstractBaseNetworkNodeContainerBlockEntity
 import com.refinedmods.refinedstorage.common.support.resource.ResourceContainerData
@@ -51,6 +50,10 @@ class StorageFlowMonitorBlockEntity(
 
     private var currentAmount: Long = 0
     private var currentlyActive: Boolean = false
+    private val flowRateHistory = mutableListOf<Long>()
+    private val flowRateTimestamps = mutableListOf<Long>()
+    private var currentFlowRate: Double = 0.0
+    private val maxHistorySize = 60
 
     init {
         val resourceContainer = ResourceContainerImpl.createForFilter(1)
@@ -73,17 +76,15 @@ class StorageFlowMonitorBlockEntity(
         if (level == null) {
             return
         }
-        trySendDisplayUpdate()
+        trySendDisplayUpdate(level!!)
     }
 
-    private fun trySendDisplayUpdate() {
-        if (level == null) {
-            return
-        }
+    private fun trySendDisplayUpdate(level: net.minecraft.world.level.Level) {
         val amount = getAmount()
         val active = mainNetworkNode.isActive
         if ((amount != currentAmount || active != currentlyActive) && displayUpdateRateLimiter.tryAcquire()) {
-            sendDisplayUpdate(level!!, amount, active)
+            updateFlowRate(amount)
+            sendDisplayUpdate(level, amount, active)
         }
     }
 
@@ -95,7 +96,7 @@ class StorageFlowMonitorBlockEntity(
 
     private fun getAmount(
         network: Network,
-        configuredResource: com.refinedmods.refinedstorage.common.api.support.resource.PlatformResourceKey,
+        configuredResource: PlatformResourceKey,
     ): Long {
         val rootStorage: RootStorage = network.getComponent(StorageNetworkComponent::class.java)
         if (!filter.isFuzzyMode || rootStorage !is FuzzyRootStorage) {
@@ -191,14 +192,17 @@ class StorageFlowMonitorBlockEntity(
 
     fun isCurrentlyActive(): Boolean {
         val isClientSide = level?.isClientSide ?: false
-        return if (isClientSide) {
-            currentlyActive
-        } else {
-            mainNetworkNode.isActive
-        }
+        val result =
+            if (isClientSide) {
+                currentlyActive
+            } else {
+                mainNetworkNode.isActive
+            }
+
+        return result
     }
 
-    fun getConfiguredResource(): com.refinedmods.refinedstorage.common.api.support.resource.PlatformResourceKey? {
+    fun getConfiguredResource(): PlatformResourceKey? {
         return filter.filterContainer.getResource(0)
     }
 
@@ -214,14 +218,6 @@ class StorageFlowMonitorBlockEntity(
         filter.isFuzzyMode = fuzzyMode
     }
 
-    override fun getRedstoneMode(): RedstoneMode {
-        return super.getRedstoneMode()
-    }
-
-    override fun setRedstoneMode(redstoneMode: RedstoneMode) {
-        super.setRedstoneMode(redstoneMode)
-    }
-
     override fun doesBlockStateChangeWarrantNetworkNodeUpdate(
         oldBlockState: BlockState,
         newBlockState: BlockState,
@@ -234,5 +230,62 @@ class StorageFlowMonitorBlockEntity(
 
     fun getFilter(): FilterWithFuzzyMode {
         return filter
+    }
+
+    fun updateFlowRate(newAmount: Long) {
+        val currentTime = System.currentTimeMillis()
+
+        flowRateHistory.add(newAmount)
+        flowRateTimestamps.add(currentTime)
+
+        if (flowRateHistory.size > maxHistorySize) {
+            flowRateHistory.removeAt(0)
+            flowRateTimestamps.removeAt(0)
+        }
+
+        calculateFlowRate()
+    }
+
+    private fun calculateFlowRate() {
+        if (flowRateHistory.size < 2) {
+            currentFlowRate = 0.0
+            return
+        }
+
+        val recentHistory = flowRateHistory.takeLast(10)
+        val recentTimestamps = flowRateTimestamps.takeLast(10)
+
+        if (recentHistory.size < 2) {
+            currentFlowRate = 0.0
+            return
+        }
+
+        val timeDiff = (recentTimestamps.last() - recentTimestamps.first()) / 1000.0
+        val amountDiff = recentHistory.last() - recentHistory.first()
+
+        currentFlowRate = if (timeDiff > 0) amountDiff / timeDiff else 0.0
+    }
+
+    fun getCurrentFlowRate(): Double {
+        return currentFlowRate
+    }
+
+    fun getFlowRateDisplayText(): String {
+        val rate = getCurrentFlowRate()
+        return when {
+            rate == 0.0 -> "0/s"
+            rate > 0 -> "+${formatFlowRate(rate)}/s"
+            else -> "${formatFlowRate(rate)}/s"
+        }
+    }
+
+    private fun formatFlowRate(rate: Double): String {
+        val absRate = kotlin.math.abs(rate)
+        return when {
+            absRate >= 1000000 -> String.format("%.1fM", rate / 1000000)
+            absRate >= 1000 -> String.format("%.1fK", rate / 1000)
+            absRate >= 1 -> String.format("%.1f", rate)
+            else -> String.format("%.2f", rate)
+        }
     }
 }

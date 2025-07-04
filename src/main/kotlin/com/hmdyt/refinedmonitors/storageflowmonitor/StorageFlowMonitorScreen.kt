@@ -58,6 +58,26 @@ class StorageFlowMonitorScreen(
     ) {
         guiGraphics.drawString(font, title, titleLabelX, titleLabelY, 4210752, false)
         guiGraphics.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, 4210752, false)
+
+        val blockEntity = getBlockEntity()
+        if (blockEntity != null) {
+            val amount = blockEntity.getCurrentAmount()
+            val flowRate = blockEntity.getCurrentFlowRate()
+            val flowRateText = blockEntity.getFlowRateDisplayText()
+
+            val amountText = formatAmount(amount)
+            val y = 35
+
+            guiGraphics.drawString(font, amountText, 10, y, 4210752, false)
+
+            val flowColor =
+                when {
+                    flowRate > 0 -> 0x55FF55
+                    flowRate < 0 -> 0xFF5555
+                    else -> 4210752
+                }
+            guiGraphics.drawString(font, flowRateText, 120, y, flowColor, false)
+        }
     }
 
     private fun formatAmount(amount: Long): String {
@@ -67,5 +87,11 @@ class StorageFlowMonitorScreen(
             amount >= 1000 -> "${amount / 1000}K"
             else -> amount.toString()
         }
+    }
+
+    private fun getBlockEntity(): StorageFlowMonitorBlockEntity? {
+        val level = minecraft?.level ?: return null
+        val pos = menu.pos ?: return null
+        return level.getBlockEntity(pos) as? StorageFlowMonitorBlockEntity
     }
 }

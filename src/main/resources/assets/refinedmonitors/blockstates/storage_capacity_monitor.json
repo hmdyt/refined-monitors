@@ -1,0 +1,27 @@
+{
+  "variants": {
+    "direction=north": {
+      "model": "refinedmonitors:block/storage_capacity_monitor"
+    },
+    "direction=south": {
+      "model": "refinedmonitors:block/storage_capacity_monitor",
+      "y": 180
+    },
+    "direction=west": {
+      "model": "refinedmonitors:block/storage_capacity_monitor",
+      "y": 270
+    },
+    "direction=east": {
+      "model": "refinedmonitors:block/storage_capacity_monitor",
+      "y": 90
+    },
+    "direction=up": {
+      "model": "refinedmonitors:block/storage_capacity_monitor",
+      "x": 270
+    },
+    "direction=down": {
+      "model": "refinedmonitors:block/storage_capacity_monitor",
+      "x": 90
+    }
+  }
+}

@@ -21,6 +21,8 @@ class StorageFlowMonitorContainerMenu : AbstractResourceContainerMenu {
     }
 
     private var storageFlowMonitor: StorageFlowMonitorBlockEntity? = null
+    val pos: net.minecraft.core.BlockPos?
+        get() = storageFlowMonitor?.blockPos
 
     constructor(
         syncId: Int,
